@@ -1,7 +1,8 @@
 import argparse
 import xml.etree.ElementTree as eTree
-from openpyxl import load_workbook
 import re
+import os
+from openpyxl import load_workbook
 
 parser = argparse.ArgumentParser(description='Parse MDS2 HN-2019 XLSX into XML')
 parser.add_argument('infile', metavar='*.xlsx', help='MDS2 form in .xls or .xlsx format')
@@ -166,7 +167,11 @@ def generate_xml():
     indent_xml(root)
     tree = eTree.ElementTree(root)
 
-    with open('mds2.xml', 'wb') as files:
+    file_name = os.path.basename(args.infile)
+    file_path, new_file = os.path.split(args.infile)
+    new_file = os.path.splitext(new_file)[0] + '.xml'
+
+    with open(file_path + '/' + new_file, 'wb') as files:
         tree.write(files, xml_declaration=True, encoding='utf-8', method='xml')
 
 
@@ -179,7 +184,7 @@ def summarize_data(section, abbreviation):
             try:
                 if any_cell.value.startswith(abbreviation):
                     doc_qid = eTree.SubElement(section, 'questionID')
-                    doc_qid.set('name', str(row[0].value))
+                    doc_qid.set('id', str(row[0].value))
                     eTree.SubElement(doc_qid, 'question').text = str(row[1].value)
                     eTree.SubElement(doc_qid, 'response').text = str(row[2].value)
 
