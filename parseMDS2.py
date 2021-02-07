@@ -1,6 +1,5 @@
 import argparse
 import xml.etree.ElementTree as eTree
-import re
 import os
 from openpyxl import load_workbook
 
@@ -28,20 +27,22 @@ def indent_xml(elem, level=0):
 
 def get_all_rows(data_file):
     all_rows = []
-    wb = load_workbook(data_file, data_only=True)
+    wb = load_workbook(data_file, data_only=True, read_only=True)
 
     for sheet in wb.sheetnames:
-        try:
-            if re.search('mds2', sheet, re.IGNORECASE):
-                ws = wb[sheet]
-                all_rows = list(ws.rows)
-            elif re.search('Sheet1', sheet, re.IGNORECASE):
-                ws = wb[sheet]
-                all_rows = list(ws.rows)
-            else:
-                print('Unable to determine sheet containing MDS2')
-
-        except (AttributeError, TypeError):
+        if 'Sheet1' in sheet:
+            ws = wb.active
+            all_rows = list(ws.rows)
+        elif 'mds2-form' in sheet:
+            ws = wb.active
+            all_rows = list(ws.rows)
+        elif 'mds2' in sheet:
+            ws = wb.active
+            all_rows = list(ws.rows)
+        elif 'MDS2' in sheet:
+            ws = wb.active
+            all_rows = list(ws.rows)
+        else:
             continue
 
     return all_rows
