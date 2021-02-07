@@ -167,7 +167,6 @@ def generate_xml():
     indent_xml(root)
     tree = eTree.ElementTree(root)
 
-    file_name = os.path.basename(args.infile)
     file_path, new_file = os.path.split(args.infile)
     new_file = os.path.splitext(new_file)[0] + '.xml'
 
