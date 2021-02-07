@@ -9,7 +9,7 @@ parser.add_argument('infile', metavar='*.xlsx', help='MDS2 form in .xls or .xlsx
 args = parser.parse_args()
 
 
-def indent(elem, level=0):
+def indent_xml(elem, level=0):
     i = "\n" + level*"  "
     if len(elem):
         if not elem.text or not elem.text.strip():
@@ -17,7 +17,7 @@ def indent(elem, level=0):
         if not elem.tail or not elem.tail.strip():
             elem.tail = i
         for elem in elem:
-            indent(elem, level+1)
+            indent_xml(elem, level+1)
         if not elem.tail or not elem.tail.strip():
             elem.tail = i
     else:
@@ -26,15 +26,20 @@ def indent(elem, level=0):
 
 
 def get_all_rows(data_file):
-    # Load workbook and single worksheet.
-    wb = load_workbook(data_file, data_only=True)
     all_rows = []
+    wb = load_workbook(data_file, data_only=True)
 
     for sheet in wb.sheetnames:
         try:
             if re.search('mds2', sheet, re.IGNORECASE):
                 ws = wb[sheet]
                 all_rows = list(ws.rows)
+            elif re.search('Sheet1', sheet, re.IGNORECASE):
+                ws = wb[sheet]
+                all_rows = list(ws.rows)
+            else:
+                print('Unable to determine sheet containing MDS2')
+
         except (AttributeError, TypeError):
             continue
 
@@ -42,8 +47,8 @@ def get_all_rows(data_file):
 
 
 def get_notes(questionid):
-    all_rows = get_all_rows(args.infile)
     note = ''
+    all_rows = get_all_rows(args.infile)
 
     for row in all_rows:
         for any_cell in row:
@@ -71,6 +76,8 @@ def generate_xml():
     section_audt.set('name', 'AUDIT CONTROLS')
     section_auth = eTree.SubElement(sections, 'section')
     section_auth.set('name', 'AUTHORIZATION')
+    section_csup = eTree.SubElement(sections, 'section')
+    section_csup.set('name', 'CYBER SECURITY PRODUCT UPGRADES')
     section_didt = eTree.SubElement(sections, 'section')
     section_didt.set('name', 'HEALTH DATA DE-IDENTIFICATION')
     section_dtbk = eTree.SubElement(sections, 'section')
@@ -113,6 +120,7 @@ def generate_xml():
     questions_alof = eTree.SubElement(section_alof, 'questions')
     questions_audt = eTree.SubElement(section_audt, 'questions')
     questions_auth = eTree.SubElement(section_auth, 'questions')
+    questions_csup = eTree.SubElement(section_csup, 'questions')
     questions_didt = eTree.SubElement(section_didt, 'questions')
     questions_dtbk = eTree.SubElement(section_dtbk, 'questions')
     questions_emrg = eTree.SubElement(section_emrg, 'questions')
@@ -136,6 +144,7 @@ def generate_xml():
     summarize_data(questions_alof, 'ALOF-')
     summarize_data(questions_audt, 'AUDT-')
     summarize_data(questions_auth, 'AUTH-')
+    summarize_data(questions_csup, 'CSUP-')
     summarize_data(questions_didt, 'DIDT-')
     summarize_data(questions_dtbk, 'DTBK-')
     summarize_data(questions_emrg, 'EMRG-')
@@ -154,7 +163,7 @@ def generate_xml():
     summarize_data(questions_txig, 'TXIG-')
     summarize_data(questions_rmot, 'RMOT-')
 
-    indent(root)
+    indent_xml(root)
     tree = eTree.ElementTree(root)
 
     with open('mds2.xml', 'wb') as files:
