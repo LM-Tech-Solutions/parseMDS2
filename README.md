@@ -32,6 +32,12 @@ optional arguments:
 ```
 
 
+## Screenshots
+![XML Output](img/screenshot_xml_output.png | width=100)
+
+![XML_Sections](img/screenshot_xml_sections.png | width=100)
+
+
 ## Test Environments
 Ubuntu 20.04 LTS, 64-bit
 
