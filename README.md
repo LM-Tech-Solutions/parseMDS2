@@ -4,6 +4,7 @@ Convert MDS2 HN-2019 format to XML
 
 ## Features
 * Accepts .xls and .xlsx as input
+* Matches text in notes column to identifier in Other Security Considerations (OTHR) section
 
 
 ## Requirements
